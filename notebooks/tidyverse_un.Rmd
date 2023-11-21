@@ -94,65 +94,116 @@ gdp_2014 |>
 
 9. Now, return to the full dataset, `gdp_df`. Pivot the data for 1990 and 2018 (using the pandas `.pivot_wider()` method or another method) so that each row corresponds to a country, each column corresponds to a year, and the values in the table give the GDP_Per_Capita amount. Drop any rows that are missing values for either 1990 or 2018. Save the result to a dataframe named `gdp_pivoted`.
 ```{r}
-#gdp_pivoted <-
+gdp_pivoted <-
 gdp_df |> 
-  filter(Year == 1990 | Year == 2018, na.rm = TRUE)
-  
+  filter(Year == 1990 | Year == 2018)|> 
+  pivot_wider(names_from = "Year", values_from = 'GDP_Per_Capita') |> 
+  na.omit()
+```
+```{r}
+gdp_pivoted
 ```
 
 10. Create a new column in `gdp_pivoted` named `Percent_Change`. This column should contain the percent change in GDP_Per_Capita from 1990 to 2018. Hint: Percent change is calculated as 100*(New Value - Old Value) / Old Value.
 ```{r}
-
+gdp_pivoted <-
+  gdp_pivoted |> 
+ mutate(Percent_Change = 100 * ((as.numeric(`2018`) - as.numeric(`1990`)) / as.numeric(`1990`)))
 ```
 
 11. How many countries experienced a negative percent change in GDP per capita from 1990 to 2018?
 ```{r}
-
+gdp_pivoted |> 
+  filter(Percent_Change < 0)
 ```
 
 12. Which country had the highest % change in GDP per capita? Create a line plot showing these country's GDP per capita for all years for which you have data. Put both line charts on the same plot.
 ```{r}
+gdp_pivoted |> 
+ arrange(desc(Percent_Change)) |> 
+
+```
+```{r}
+gdp_df |> 
+ filter(Country == "Equatorial Guinea") |> 
+  ggplot(aes(x = Year, y = `GDP_Per_Capita`)) +
+ 
+  geom_line()
 
 ```
 
 13. Read in continents.csv contained in the `data` folder into a new dataframe called `continents`. We will be using this dataframe to add a new column to our dataset.
 ```{r}
-
+continents <- read_csv('../data/continents.csv')
 ```
 
 14. Merge gdp_df and continents. Keep only the countries that appear in both data frames. Save the result back to gdp_df.
 ```{r}
-
+gdp_df <- inner_join(gdp_df, continents)
 ```
 
 15. Determine the number of countries per continent. Create a bar chart showing this.
 ```{r}
-
+gdp_df |> 
+  group_by(Continent) |> 
+  count(name = 'count') |>
+  ggplot(aes(x = Continent, y = count)) +
+  geom_col()
+  
 ```
 
 16. Create a boxplot showing GDP per capita in 2018 split out by continent. What do you notice?
 ```{r}
-
+gdp_df |>
+  filter(Year == 2018) |> 
+  group_by(Continent) |> 
+  summarize(mean(GDP_Per_Capita)) |> 
+  ggplot(aes(x = Continent, y = `GDP_Per_Capita`)) +
+  geom_boxplot()
+ 
 ```
 
 17. Read life_expectancy.csv into a tibble named life_expectancy. Do not modify the csv file in order to read this data in. 
 ```{r}
-
+life_expectancy <- 
+  read_csv("../data/life_expectancy.csv", skip = 3) |> 
+select(-c('Country Code', 'Indicator Name', 'Indicator Code'))
+```
+```{r}
+life_expectancy
 ```
  
 18. Drop the Country Code, Indicator Name, and Indicator Code columns. Then use `pivot_longer` to convert your data from wide to long. That is, instead of having one row per country and multiple colums per year, we want to have multiple rows per country and a single column for year. After melting, rename the columns to `Country`, `Year`, and `Life_Expectancy`.
 ```{r}
+life_expectancy <-
+life_expectancy |> 
+  pivot_longer(cols = -'Country Name', names_to = 'Year', values_to = "life_expectancy")
+```
+```{r}
+life_expectancy <-
+life_expectancy |> 
+  na.omit()  
+```
+
+```{r}
+life_expectancy <-
+life_expectancy |> 
+   rename(Country = 'Country Name', 'Life_Expectancy' = 'life_expectancy') 
 
 ```
 
 19. What was the first country with a life expectancy to exceed 80?
 ```{r}
+life_expectancy |> 
+  filter(`Life_Expectancy` > 80) |> 
+  arrange(Year)
 
 ```
+Japan was the first Country with a life Expectancy above 80.
 
 20. Merge `gdp_df` and `life_expectancy`, keeping all countries and years that appear in both DataFrames. Save the result to a new DataFrame named `gdp_le`. If you get any errors in doing this, read them carefully and correct them. Look at the first five rows of your new data frame to confirm it merged correctly. Also, check the last five rows to make sure the data is clean and as expected.
 ```{r}
-
+gdp_df <- inner_join(gdp_df, life_expectancy)
 ```
 
 21. Create a new DataFrame, named `gdp_le_2019` by extracting data for the year 2019 from `gdp_le`. How many countries have a life expectancy of at least 80 in 2019?
