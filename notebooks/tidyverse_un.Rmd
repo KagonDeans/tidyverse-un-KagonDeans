@@ -33,20 +33,15 @@ gdp_df <- gdp_df |>
 ```
 3. Which years are represented in this dataset? How many observations are there per year? Make a plot to view the number of observations per year.
 
+
 ```{r}
 gdp_df |> 
-  distinct(Year)
-```
-```{r}
-gdp_df |> 
-  group_by(Year) |> 
-  count(name = "num_observations")
+  count(Year)
 ```
 ```{r}
 gdp_df |>
-  group_by(Year) |> 
-  count(name = 'count') |>
-  ggplot(aes(x = Year, y = count)) +
+  count(Year) |> 
+  ggplot(aes(x = Year, y = n)) +
   geom_col()
 ```
 
@@ -97,7 +92,7 @@ gdp_2014 |>
 gdp_pivoted <-
 gdp_df |> 
   filter(Year == 1990 | Year == 2018)|> 
-  pivot_wider(names_from = "Year", values_from = 'GDP_Per_Capita') |> 
+  pivot_wider(names_from = Year, values_from = GDP_Per_Capita) |> 
   na.omit()
 ```
 ```{r}
@@ -108,7 +103,7 @@ gdp_pivoted
 ```{r}
 gdp_pivoted <-
   gdp_pivoted |> 
- mutate(Percent_Change = 100 * ((as.numeric(`2018`) - as.numeric(`1990`)) / as.numeric(`1990`)))
+ mutate(Percent_Change = 100 * (((`2018`) - (`1990`)) / (`1990`)))
 ```
 
 11. How many countries experienced a negative percent change in GDP per capita from 1990 to 2018?
@@ -120,7 +115,7 @@ gdp_pivoted |>
 12. Which country had the highest % change in GDP per capita? Create a line plot showing these country's GDP per capita for all years for which you have data. Put both line charts on the same plot.
 ```{r}
 gdp_pivoted |> 
- arrange(desc(Percent_Change)) |> 
+ arrange(desc(Percent_Change)) 
 
 ```
 ```{r}
@@ -157,10 +152,16 @@ gdp_df |>
 gdp_df |>
   filter(Year == 2018) |> 
   group_by(Continent) |> 
-  summarize(mean(GDP_Per_Capita)) |> 
-  ggplot(aes(x = Continent, y = `GDP_Per_Capita`)) +
-  geom_boxplot()
+  ggplot(aes(x = Continent, y = GDP_Per_Capita)) +
+   geom_boxplot()
+  
+  
  
+```
+
+```{r}
+ggplot(aes(x = Continent, y = `GDP_Per_Capita`)) +
+  geom_boxplot()
 ```
 
 17. Read life_expectancy.csv into a tibble named life_expectancy. Do not modify the csv file in order to read this data in. 
@@ -179,6 +180,10 @@ life_expectancy <-
 life_expectancy |> 
   pivot_longer(cols = -'Country Name', names_to = 'Year', values_to = "life_expectancy")
 ```
+
+
+
+
 ```{r}
 life_expectancy <-
 life_expectancy |> 
