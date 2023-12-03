@@ -159,11 +159,6 @@ gdp_df |>
  
 ```
 
-```{r}
-ggplot(aes(x = Continent, y = `GDP_Per_Capita`)) +
-  geom_boxplot()
-```
-
 17. Read life_expectancy.csv into a tibble named life_expectancy. Do not modify the csv file in order to read this data in. 
 ```{r}
 life_expectancy <- 
@@ -207,33 +202,89 @@ life_expectancy |>
 Japan was the first Country with a life Expectancy above 80.
 
 20. Merge `gdp_df` and `life_expectancy`, keeping all countries and years that appear in both DataFrames. Save the result to a new DataFrame named `gdp_le`. If you get any errors in doing this, read them carefully and correct them. Look at the first five rows of your new data frame to confirm it merged correctly. Also, check the last five rows to make sure the data is clean and as expected.
+
 ```{r}
-gdp_df <- inner_join(gdp_df, life_expectancy)
+str(gdp_df)
 ```
+```{r}
+str(life_expectancy)
+```
+```{r}
+gdp_df <- 
+  gdp_df |> 
+  transform(Year = as.character(Year))
+```
+```{r}
+str(gdp_df)
+```
+```{r}
+gdp_le <- inner_join(gdp_df, life_expectancy)
+```
+```{r}
+gdp_le
+```
+
 
 21. Create a new DataFrame, named `gdp_le_2019` by extracting data for the year 2019 from `gdp_le`. How many countries have a life expectancy of at least 80 in 2019?
 ```{r}
-
+gdp_le_2019 <- 
+  gdp_le |> 
+  filter( Year == 2019)
+  
+```
+```{r}
+gdp_le_2019 |> 
+ filter(Life_Expectancy >= 80) |> 
+  summarize(num_rows = n())
 ```
 
 22. Find the countries that had the top 3 largest GDP per capita figures for 2019. Create a plot showing the change in life expectancy over time for these three countries. This plot should be faceted so that each country is contained in its own figure.
 ```{r}
-
+gdp_le_2019 |> 
+  arrange(desc(GDP_Per_Capita)) |> 
+  head(3) 
+  
+```
+```{r}
+gdp_le |> 
+ filter(Country == 'Macao SAR, China' | Country == "Luxembourg" | Country == "Singapore") |> 
+  ggplot(aes(x = Year, y = Country)) +
+  geom_line() +
+  facet_grid()
 ```
 
 23. Create a scatter plot of Life Expectancy vs GDP per Capita for the year 2019. What do you notice?
 ```{r}
-
+gdp_le_2019 |> 
+  ggplot(aes(x = Life_Expectancy, y = GDP_Per_Capita)) +
+   geom_point()
 ```
 
 24. Find the correlation between Life Expectancy and GDP per Capita for the year 2019. What is the meaning of this number?
 ```{r}
+gdp_le_2019 |> 
+  select(Life_Expectancy, GDP_Per_Capita) |> 
+  cor()
 
 ```
 
 25. Add a column to `gdp_le_2019` and calculate the logarithm of GDP per capita. Find the correlation between the log of GDP per capita and life expectancy. How does this compare to the calculation in the previous part? Look at a scatter plot to see if the result of this calculation makes sense.
 ```{r}
+gdp_le_2019 <- 
+  gdp_le_2019 |> 
+  mutate(Log_GDP = log10(GDP_Per_Capita))
 ```
+```{r}
+gdp_le_2019 |> 
+  select(Life_Expectancy, Log_GDP) |> 
+  cor()
+```
+```{r}
+gdp_le_2019 |> 
+  ggplot(aes(x = Life_Expectancy, y = Log_GDP)) +
+   geom_point()
+```
+
 
 
 
